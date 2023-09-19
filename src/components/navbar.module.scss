@@ -1,0 +1,60 @@
+.navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+    margin: auto;
+    
+    .left {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4rem; /* reduced from 60px */
+        margin: 0 1rem; /* reduced from 10px */
+        
+        .chatmegle {
+            font-size: 3rem; /* reduced from 50px */
+            margin: 0.5rem; /* reduced from 5px */
+            font-weight: bold;
+        }
+
+        .strangers {
+            font-size: 1.5rem; /* reduced from 25px */
+        }
+    }
+
+    .right {
+        margin: 0 1rem; /* reduced from 10px */
+        
+        .online {
+            font-size: 1.5rem; /* reduced from 25px */
+        }
+    }
+
+    /* Mobile Styles */
+    @media (max-width: 768px) {
+        align-items: flex-start;
+        
+        .left {
+            flex-direction: column;
+            gap: 1rem;
+            
+            .chatmegle {
+                font-size: 2rem; /* further reduced for mobile */
+            }
+
+            .strangers {
+                font-size: 1.25rem; /* further reduced for mobile */
+            }
+        }
+
+        .right {
+            margin-top: 1rem;
+            
+            .online {
+                font-size: 1.25rem; /* further reduced for mobile */
+            }
+        }
+    }
+}
