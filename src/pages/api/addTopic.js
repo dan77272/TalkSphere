@@ -39,7 +39,8 @@ export default async function handler(req, res) {
             await sql`INSERT INTO Topics (userId, topics) VALUES (${req.body.userId}, ${req.body.topics})`;
             return res.status(200).json({ status: "Waiting for match" });
         } catch (error) {
-            return res.status(500).json(error);
+            console.error("Error in /api/addTopic:", error);
+            return res.status(500).json({ error: "Internal Server Error" });
         }
     } else {
         return res.status(405).json({ error: 'Method not allowed' });

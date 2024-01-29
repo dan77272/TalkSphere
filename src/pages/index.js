@@ -6,7 +6,7 @@ import axios from 'axios'
 
 export default function Home() {
   const [topics, setTopics] = useState([]);
-  // const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState('');
   const [textClicked, setTextClicked] = useState(false)
   const [message, setMessage] = useState('')
   const [text, setText] = useState([])
