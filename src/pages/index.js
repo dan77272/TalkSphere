@@ -220,75 +220,67 @@ function endChat() {
 
   if(!textClicked){
     return (
-      <div className={styles.page}>
+      <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className={styles.homePage}>
-          {/* <div className={styles.topic}>
-            <label className={styles.label}>What do you want to talk about?</label>
-            <div className={styles.inputContainer}>
-              <input className={styles.inputText}
-                type="text"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Enter a topic of interest"
-              />
-              <div className={styles.topicsContainer}>
-                {topics.map((t, index) => (
-                  <span key={index} className={styles.topicItem}>
-                    {t}
-                    <p className={styles.p}>x</p>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div> */}
-          <div className={styles.chat}>
-            <label className={styles.label}>Start chatting with a random stranger!</label>
-            <button className={styles.button} onClick={handleTextClick}>Text</button>
+        <div className="mt-2 bg-[#fff7ee] flex flex-1 gap-[200px] justify-center items-center md:flex-col flex-row">
+          <div className="flex flex-col items-center text-center gap-[10px]">
+            <label className="text-[30px] self-start">Start chatting with a random stranger!</label>
+            <button
+              className="text-[30px] py-[3px] px-[30px] border-none rounded-lg text-white cursor-pointer w-[150px] h-[60px] bg-custom-gradient"
+              onClick={handleTextClick}
+            >
+              Text
+            </button>
           </div>
         </div>
       </div>
     );
   }else{
     return (
-      <div className={styles.page}>
-        <Navbar/>
-        <div className={styles.chatPage}>
-          <div className={styles.chat}>
-          <div className={styles.texts}>
-              {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
-              {text.map((message, index) => (
-                <div key={index}>
-                  {message.senderId === userId ? 
-                    <p><span style={{color: 'blue'}}>You: </span>{message.text}</p> :
-                    message.senderId === 'system' ? 
-                    <p>{message.text}</p> : 
-                    <p><span style={{color: 'red'}}>Stranger: </span>{message.text}</p>}
-                </div>
-              ))}
-            </div>
-            
-          </div>
-          <div className={styles.inputSection}>
-            <button className={waiting ? `${styles.blockedStop}` : `${styles.stop}`} onClick={inChat ? endChat : startNewChat}>
-              {inChat ? "Stop" : "New Chat"}
-            </button>
-            <textarea
-                className={styles.textArea}
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                }}
-            />
-            <button className={(!inChat || waiting) ? styles.blockedSend : styles.send} onClick={sendMessage}>Send</button>
+      <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex flex-col flex-grow mt-[2px] bg-[#fff7ee] pt-[20px]">
+        <div className="m-auto bg-white w-[98%] border-[1px] rounded-t-lg flex-grow overflow-scroll h-[79vh]">
+          <div className="m-[10px] text-[15px] font-semibold">
+            {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
+            {text.map((message, index) => (
+              <div key={index}>
+                {message.senderId === userId ? 
+                  <p><span style={{color: 'blue'}}>You: </span>{message.text}</p> :
+                  message.senderId === 'system' ? 
+                  <p>{message.text}</p> : 
+                  <p><span style={{color: 'red'}}>Stranger: </span>{message.text}</p>}
+              </div>
+            ))}
           </div>
         </div>
+        <div className="m-auto flex justify-center w-full rounded-b-lg">
+          <button
+            className={`w-[100px] ml-[1%] bg-white border-[1px] border-[black] rounded-bl-lg text-[15px] ${waiting ? 'opacity-60 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}
+            onClick={inChat ? endChat : startNewChat}
+          >
+            {inChat ? "Stop" : "New Chat"}
+          </button>
+          <textarea
+            className="w-full h-[80px] resize-y text-[18px] border-t-[1px] border-b-[1px] border-black pl-1"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+          />
+          <button
+            className={`w-[100px] mr-[1%] bg-white border-[1px] border-[black] rounded-br-lg text-[15px] ${(!inChat || waiting) ? 'opacity-60 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}
+            onClick={sendMessage}
+          >
+            Send
+          </button>
+        </div>
       </div>
+    </div>
 
     )
   }

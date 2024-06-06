@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import Pusher from 'pusher';  // Ensure you've installed the `pusher` package.
+import Pusher from 'pusher';
 
 const pusher = new Pusher({
     appId: process.env.APP_ID,
