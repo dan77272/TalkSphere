@@ -240,7 +240,7 @@ function endChat() {
       <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex flex-col flex-grow mt-[2px] bg-[#fff7ee] pt-[20px]">
-        <div className="m-auto bg-white w-[98%] border-[1px] rounded-t-lg flex-grow overflow-scroll h-[79vh]">
+        <div className="m-auto bg-white w-[98%] border-[1px] rounded-t-lg flex-grow overflow-scroll overflow-x-hidden h-[78vh] carousel-container">
           <div className="m-[10px] text-[15px] font-semibold">
             {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
             {text.map((message, index) => (
