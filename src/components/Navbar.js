@@ -9,7 +9,7 @@ export default function Navbar({usersWaiting, usersInChat}) {
                 <p className="text-[20px]">Talk to Strangers!</p>
             </div>
             <div className="mx-4">
-                <p className="text-[25px]">{(usersWaiting || 0) + (usersInChat || 0)} online now</p>
+                <p className="text-[15px] md:text-[25px]">{(usersWaiting || 0) + (usersInChat || 0)} online now</p>
             </div>
         </div>
     );
