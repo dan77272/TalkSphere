@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
 import styles from '../styles/Home.module.css';
 import Pusher from 'pusher-js'
@@ -16,6 +16,15 @@ export default function Home() {
   const [waiting, setWaiting] = useState(true);
   const [inChat, setInChat] = useState(true);
   const [isStartingNewChat, setIsStartingNewChat] = useState(false);
+
+
+  const chatContainerRef  = useRef(null)
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [text]);
 
   
   useEffect(() => {
@@ -240,7 +249,7 @@ function endChat() {
       <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex flex-col flex-grow mt-[2px] bg-[#fff7ee] pt-[20px]">
-        <div className="m-auto bg-white w-[98%] border-[1px] rounded-t-lg flex-grow overflow-scroll overflow-x-hidden h-[78vh] carousel-container">
+        <div ref={chatContainerRef} className="m-auto bg-white w-[98%] border-[1px] rounded-t-lg flex-grow overflow-scroll overflow-x-hidden h-[78vh] carousel-container">
           <div className="m-[10px] text-[15px] font-semibold">
             {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
             {text.map((message, index) => (
