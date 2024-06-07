@@ -70,6 +70,23 @@ export default function Home() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [userId, recipientId]);  // Dependency on userId and recipientId.
+
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if(waiting){
+        e.preventDefault()
+        axios.post('/api/cancelWait', {userId}).catch((error) => {
+          console.error('Error notifying server about user departure', error);
+        })
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [waiting, userId])
   
   
 
@@ -89,6 +106,7 @@ export default function Home() {
     setText([]);
     axios.post('/api/addTopic', { topics, userId })
         .then(response => {
+          console.log('Server response:', response.data);
             if (response.data.status === "Match found") {
                 setWaiting(false)
                 setRecipientId(response.data.recipientId);
@@ -103,6 +121,7 @@ export default function Home() {
                 const channel = pusher.subscribe(personalChannel);
                 channel.bind('matched', function(data) {
                     const { chatChannel, recipientId } = data;
+                    console.log('Matched data:', data);
                     setRecipientId(recipientId);
                     setChannel(chatChannel);
                     initializeChat(chatChannel);
