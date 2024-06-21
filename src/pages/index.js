@@ -272,7 +272,7 @@ function endChat() {
           <div className="m-[10px] text-[15px] font-semibold">
             {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
             {text.map((message, index) => (
-              <div key={index}>
+              <div key={index} className='mt-1'>
                 {message.senderId === userId ? 
                   <p><span style={{color: 'blue'}}>You: </span>{message.text}</p> :
                   message.senderId === 'system' ? 
