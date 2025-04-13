@@ -16,6 +16,7 @@ export default function Home() {
   const [waiting, setWaiting] = useState(true);
   const [inChat, setInChat] = useState(true);
   const [isStartingNewChat, setIsStartingNewChat] = useState(false);
+  const [usersOnline, setUsersOnline] = useState(0)
 
 
   const chatContainerRef  = useRef(null)
@@ -89,6 +90,22 @@ export default function Home() {
   }, [waiting, userId])
   
   
+  useEffect(() => {
+    async function fetchOnlineUsers() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        setUsersOnline(data.usersOnline);
+      } catch (error) {
+        console.error('Failed to fetch user stats', error);
+      }
+    }
+  
+    fetchOnlineUsers();
+    const interval = setInterval(fetchOnlineUsers, 5000); // every 5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
 
 
 
@@ -249,7 +266,7 @@ function endChat() {
   if(!textClicked){
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <Navbar usersOnline={usersOnline}/>
         <div className="mt-2 bg-[#fff7ee] flex flex-1 gap-[200px] justify-center items-center md:flex-col flex-row">
           <div className="flex flex-col items-center text-center gap-[10px]">
             <label className="text-[30px] self-start">Start chatting with a random stranger!</label>
@@ -266,13 +283,13 @@ function endChat() {
   }else{
     return (
       <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar usersOnline={usersOnline}/>
       <div className="flex flex-col flex-grow mt-[2px] bg-[#fff7ee] pt-[20px]">
         <div ref={chatContainerRef} className="m-auto bg-white w-[98%] border-[1px] rounded-t-lg flex-grow overflow-scroll overflow-x-hidden h-[78vh] carousel-container">
           <div className="m-[10px] text-[15px] font-semibold">
             {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
             {text.map((message, index) => (
-              <div key={index} className='mt-1'>
+              <div key={index}>
                 {message.senderId === userId ? 
                   <p><span style={{color: 'blue'}}>You: </span>{message.text}</p> :
                   message.senderId === 'system' ? 
