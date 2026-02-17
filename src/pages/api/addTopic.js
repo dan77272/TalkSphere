@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import Pusher from 'pusher';  // Ensure you've installed the `pusher` package.
+import Pusher from 'pusher';
 
 const pusher = new Pusher({
     appId: process.env.APP_ID,
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     if(req.method === 'POST'){
         console.log(req.body);
         try{
-            const waitingUsers = await sql`SELECT * FROM Topics`;
+            const waitingUsers = await sql`SELECT * FROM Topics WHERE userId != ${req.body.userId}`;
             if(waitingUsers.rows.length > 0){
                 const matchedUser = waitingUsers.rows[0];
                 const chatChannel = [req.body.userId, matchedUser.userid].sort().join('-');

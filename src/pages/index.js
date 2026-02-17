@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
 import styles from '../styles/Home.module.css';
 import Pusher from 'pusher-js'
@@ -16,6 +16,16 @@ export default function Home() {
   const [waiting, setWaiting] = useState(true);
   const [inChat, setInChat] = useState(true);
   const [isStartingNewChat, setIsStartingNewChat] = useState(false);
+  const [usersOnline, setUsersOnline] = useState(0)
+
+
+  const chatContainerRef  = useRef(null)
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [text]);
 
   
   useEffect(() => {
@@ -61,8 +71,41 @@ export default function Home() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [userId, recipientId]);  // Dependency on userId and recipientId.
+
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if(waiting){
+        e.preventDefault()
+        axios.post('/api/cancelWait', {userId}).catch((error) => {
+          console.error('Error notifying server about user departure', error);
+        })
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [waiting, userId])
   
   
+  useEffect(() => {
+    async function fetchOnlineUsers() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        setUsersOnline(data.usersOnline);
+      } catch (error) {
+        console.error('Failed to fetch user stats', error);
+      }
+    }
+  
+    fetchOnlineUsers();
+    const interval = setInterval(fetchOnlineUsers, 5000); // every 5 seconds
+  
+    return () => clearInterval(interval);
+  }, []);
 
 
 
@@ -80,6 +123,7 @@ export default function Home() {
     setText([]);
     axios.post('/api/addTopic', { topics, userId })
         .then(response => {
+          console.log('Server response:', response.data);
             if (response.data.status === "Match found") {
                 setWaiting(false)
                 setRecipientId(response.data.recipientId);
@@ -94,6 +138,7 @@ export default function Home() {
                 const channel = pusher.subscribe(personalChannel);
                 channel.bind('matched', function(data) {
                     const { chatChannel, recipientId } = data;
+                    console.log('Matched data:', data);
                     setRecipientId(recipientId);
                     setChannel(chatChannel);
                     initializeChat(chatChannel);
@@ -220,75 +265,67 @@ function endChat() {
 
   if(!textClicked){
     return (
-      <div className={styles.page}>
-        <Navbar />
-        <div className={styles.homePage}>
-          {/* <div className={styles.topic}>
-            <label className={styles.label}>What do you want to talk about?</label>
-            <div className={styles.inputContainer}>
-              <input className={styles.inputText}
-                type="text"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Enter a topic of interest"
-              />
-              <div className={styles.topicsContainer}>
-                {topics.map((t, index) => (
-                  <span key={index} className={styles.topicItem}>
-                    {t}
-                    <p className={styles.p}>x</p>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div> */}
-          <div className={styles.chat}>
-            <label className={styles.label}>Start chatting with a random stranger!</label>
-            <button className={styles.button} onClick={handleTextClick}>Text</button>
+      <div className="min-h-screen flex flex-col">
+        <Navbar usersOnline={usersOnline}/>
+        <div className="mt-2 bg-[#fff7ee] flex flex-1 gap-[200px] justify-center items-center md:flex-col flex-row">
+          <div className="flex flex-col items-center text-center gap-[10px]">
+            <label className="text-[30px] self-start">Start chatting with a random stranger!</label>
+            <button
+              className="text-[30px] py-[3px] px-[30px] border-none rounded-lg text-white cursor-pointer w-[150px] h-[60px] bg-custom-gradient"
+              onClick={handleTextClick}
+            >
+              Text
+            </button>
           </div>
         </div>
       </div>
     );
   }else{
     return (
-      <div className={styles.page}>
-        <Navbar/>
-        <div className={styles.chatPage}>
-          <div className={styles.chat}>
-          <div className={styles.texts}>
-              {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
-              {text.map((message, index) => (
-                <div key={index}>
-                  {message.senderId === userId ? 
-                    <p><span style={{color: 'blue'}}>You: </span>{message.text}</p> :
-                    message.senderId === 'system' ? 
-                    <p>{message.text}</p> : 
-                    <p><span style={{color: 'red'}}>Stranger: </span>{message.text}</p>}
-                </div>
-              ))}
-            </div>
-            
-          </div>
-          <div className={styles.inputSection}>
-            <button className={waiting ? `${styles.blockedStop}` : `${styles.stop}`} onClick={inChat ? endChat : startNewChat}>
-              {inChat ? "Stop" : "New Chat"}
-            </button>
-            <textarea
-                className={styles.textArea}
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                }}
-            />
-            <button className={(!inChat || waiting) ? styles.blockedSend : styles.send} onClick={sendMessage}>Send</button>
+      <div className="min-h-screen flex flex-col">
+      <Navbar usersOnline={usersOnline}/>
+      <div className="flex flex-col flex-grow mt-[2px] bg-[#fff7ee] pt-[20px]">
+        <div ref={chatContainerRef} className="m-auto bg-white w-[98%] border-[1px] rounded-t-lg flex-grow overflow-scroll overflow-x-hidden h-[78vh] carousel-container">
+          <div className="m-[10px] text-[15px] font-semibold">
+            {waiting ? <p>Looking for someone to chat with...</p> : <p>You're now chatting with a random stranger.</p>}
+            {text.map((message, index) => (
+              <div key={index}>
+                {message.senderId === userId ? 
+                  <p><span style={{color: 'blue'}}>You: </span>{message.text}</p> :
+                  message.senderId === 'system' ? 
+                  <p>{message.text}</p> : 
+                  <p><span style={{color: 'red'}}>Stranger: </span>{message.text}</p>}
+              </div>
+            ))}
           </div>
         </div>
+        <div className="m-auto flex justify-center w-full rounded-b-lg">
+          <button
+            className={`w-[100px] ml-[1%] bg-white border-[1px] border-[black] rounded-bl-lg text-[15px] ${waiting ? 'opacity-60 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}
+            onClick={inChat ? endChat : startNewChat}
+          >
+            {inChat ? "Stop" : "New Chat"}
+          </button>
+          <textarea
+            className="w-full h-[80px] resize-y text-[18px] border-t-[1px] border-b-[1px] border-black pl-1"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+          />
+          <button
+            className={`w-[100px] mr-[1%] bg-white border-[1px] border-[black] rounded-br-lg text-[15px] ${(!inChat || waiting) ? 'opacity-60 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}`}
+            onClick={sendMessage}
+          >
+            Send
+          </button>
+        </div>
       </div>
+    </div>
 
     )
   }
